@@ -1,0 +1,402 @@
+[
+  {
+    "name": "Disperse",
+    "text": "Anywhere: (boat)\nMove a (chit) from there to any other area, in any order.",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Direct Flight",
+    "text": "Place (direct flight) on an arrow.\n(Cards of each connected color are the other color too).",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Glass-Bottom Boats",
+    "text": "Each area where you have a (fish):(boat).",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Head West",
+    "text": "Coral Sea: (boat)\nMove up to one (chit) from each other area to Coral Sea.",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Migration",
+    "text": "Anywhere: (boat)\nMove all (fish) from another area to there.",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Port",
+    "text": "Anywhere: (boat), (port)\n(Run first: You may move a (hotel), (factory), (fish) or (boat) to here.",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Relocate",
+    "text": "Peru: (boat)\nMove up to 3 (chit) from any one area to any one other area.",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Reorganize",
+    "text": "California: (boat)\nMove up to 4 (chit) to California.",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Yachts",
+    "text": "Polynesia: (boat)\nMove up to one (chit) of each type to Polynesia.",
+    "types": ["Transit"]
+  },
+  {
+    "name": "Archaeology",
+    "text": "Move up to 4 (chit) to Peru. Then +$1 per (chit) there.",
+    "types": ["Transit", "Business"]
+  },
+  {
+    "name": "Documentary",
+    "text": "Next turn, +$2 per (chit) you move or take off of your playmat.",
+    "types": ["Transit", "Business"]
+  },
+  {
+    "name": "Fishing",
+    "text": "Anywhere: (boat)\n+$4 per (boat) you have.",
+    "types": ["Transit", "Business"]
+  },
+  {
+    "name": "Grand Opening",
+    "text": "Next turn, +$2 per (chit) you put on your playmat.",
+    "types": ["Transit", "Business"]
+  },
+  {
+    "name": "Casinos",
+    "text": "Any area: (hotel) per (hotel) you have in that area.\nNext turn, you pick your own card.",
+    "types": ["Transit", "Tourism"]
+  },
+  {
+    "name": "Upgrade",
+    "text": "Next turn, for each (chit) you place another way, put a (hotel) in the same area.",
+    "types": ["Transit", "Business"]
+  },
+  {
+    "name": "Albatrosses",
+    "text": "Japan: (boat) (fish)\nYou may move up to 3 (chit) to Japan.",
+    "types": ["Transit", "Nature"]
+  },
+  {
+    "name": "Dolphin Spy Network",
+    "text": "Japan: 2 (fish) Next turn, pick what to put out after seeing what players not playing this put out.",
+    "types": ["Transit", "Nature"]
+  },
+  {
+    "name": "Giant Squid",
+    "text": "Anywhere: (boat)\nAnywhere else: 2 (fish)",
+    "types": ["Transit", "Nature"]
+  },
+  {
+    "name": "Jellyfish",
+    "text": "Peru: (boat) (fish)\nMove up to 3 (chit) from Peru to one other area.",
+    "types": ["Transit", "Nature"]
+  },
+  {
+    "name": "Killer Whales",
+    "text": "Japan: (boat) 2 (fish)",
+    "types": ["Transit", "Nature"]
+  },
+  {
+    "name": "Seagulls",
+    "text": "California: (boat) (fish)\nMove any number of (fish) to California.",
+    "types": ["Transit", "Nature"]
+  },
+  {
+    "name": "Air Conditioning",
+    "text": "+$1 per (hotel) you have.",
+    "types": ["Business"]
+  },
+  {
+    "name": "Balloon Trip",
+    "text": "California: (balloon)\n(Run: Moves like a (fish). When this moves to California, +$15.)",
+    "types": ["Business"]
+  },
+  {
+    "name": "Brochures",
+    "text": "If you have (hotel) in at least 3 areas, +$2 per (hotel) you have.",
+    "types": ["Business"]
+  },
+  {
+    "name": "Diversify",
+    "text": "+$5 per (factory) or (fish) you have, whichever is less.",
+    "types": ["Business"]
+  },
+  {
+    "name": "Omnipresence",
+    "text": "+$15 per (chit) you have in the area with the fewest.",
+    "types": ["Business"]
+  },
+  {
+    "name": "Package Tours",
+    "text": "+$9 per area where you have 3 or more different kinds of (chit).",
+    "types": ["Business"]
+  },
+  {
+    "name": "Tour Guides",
+    "text": "+$2 per (fish) you have in areas with no other kinds of (chit).",
+    "types": ["Business"]
+  },
+  {
+    "name": "Tourist Season",
+    "text": "+$6 per area you have 3 (chit) or more in.",
+    "types": ["Business"]
+  },
+  {
+    "name": "Whale Watching",
+    "text": "+$1 per (fish) you have.",
+    "types": ["Business"]
+  },
+  {
+    "name": "Computer Chip Factory",
+    "text": "California: (factory)\n+$5. Draw a card.",
+    "types": ["Business", "Industry"]
+  },
+  {
+    "name": "Liquidate",
+    "text": "Remove up to one (chit) from each area, for +$3 each.",
+    "types": ["Business", "Industry"]
+  },
+  {
+    "name": "Pet Rocks",
+    "text": "+$3 per (factory) you have.\nLose (chit).",
+    "types": ["Business", "Industry"]
+  },
+  {
+    "name": "Refinery",
+    "text": "Peru: (factory)\n+$3 per different kind of (chit) you have in Peru.",
+    "types": ["Business", "Industry"]
+  },
+  {
+    "name": "Widget Factory",
+    "text": "Anywhere: (factory)\n+$1 per (factory) you have there.",
+    "types": ["Business", "Industry"]
+  },
+  {
+    "name": "Floating Hotel",
+    "text": "Coral Sea: 2 (hotel)\nIf no-one else picked this, +$5.",
+    "types": ["Business", "Tourism"]
+  },
+  {
+    "name": "Proliferation",
+    "text": "Each area where you have any (chit): (fish)\n+$2 per such area.",
+    "types": ["Business", "Nature"]
+  },
+  {
+    "name": "Sea Lions",
+    "text": "Peru: 2 (fish)\n+$3 per different kind of (chit) you have in Peru.",
+    "types": ["Business", "Nature"]
+  },
+  {
+    "name": "Bottling Factory",
+    "text": "Peru: 2 (factory)\nSkip running Peru this turn.",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Car Factory",
+    "text": "Japan: 2 (factory)\nLose (chit).",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Crunch Time",
+    "text": "Any area: (factory) per (factory) you have there.",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Dairy Farms",
+    "text": "California: (factory)\nPolynesia: (factory)",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Deepwater Drilling",
+    "text": "Coral Sea: (factory)\nJapan: (factory)",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Expand",
+    "text": "Each area where you have any (hotel):(factory).",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Plastics Factories",
+    "text": "California: 2 (factory)\nLose 2 (fish)",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Saw Mill",
+    "text": "Polynesia: 2 (factory)\nLose (chit)",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Textile Factories",
+    "text": "Polynesia: (factory)\nPeru: (factory)",
+    "types": ["Industry"]
+  },
+  {
+    "name": "Beach Hotels",
+    "text": "Japan: 3 (hotel)\nLose 2 (fish).",
+    "types": ["Industry", "Tourism"]
+  },
+  {
+    "name": "Holiday in Peru",
+    "text": "Peru: (hotel)\nReplace each (fish), (boat), and (factory) in Peru with a (hotel).",
+    "types": ["Industry", "Tourism"]
+  },
+  {
+    "name": "Industrial Hotels",
+    "text": "Replace any number of (factory) with 2 (hotel) each.",
+    "types": ["Industry", "Tourism"]
+  },
+  {
+    "name": "Seafood Chain",
+    "text": "Replace any number of (fish) with (hotel) each.",
+    "types": ["Industry", "Tourism"]
+  },
+  {
+    "name": "Underwater Hotel",
+    "text": "Coral Sea: 3 (hotel)\nLose (chit) from Coral Sea.",
+    "types": ["Industry", "Tourism"]
+  },
+  {
+    "name": "Octopus",
+    "text": "Japan: (factory) 2 (fish).",
+    "types": ["Industry", "Nature"]
+  },
+  {
+    "name": "Sharks",
+    "text": "California: 3 (fish)\nPolynesia: 3 (fish)\nLose 3 (fish).",
+    "types": ["Industry", "Nature"]
+  },
+  {
+    "name": "Aquarium",
+    "text": "If you have 2 (fish) or more, put 3 (hotel) on Polynesia.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Capsule Hotels",
+    "text": "If you have 2 (factory) or more, put 3 (hotel) on Japan.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Cruise Ships",
+    "text": "Each area where you have a (boat): 2 (hotel).",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Hotel California",
+    "text": "If you have $5 or more, put 3 (hotel) on California.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Island Resort",
+    "text": "Polynesia: 3 (hotel)\nSkip running Polynesia this turn.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Machu Picchu",
+    "text": "If you have at least 2 (chit) on Peru, put 3 (hotel) on Peru.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Spas",
+    "text": "If you have $5 or more, put 3 (hotel) on Peru.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Theme Park",
+    "text": "If you have 2 (fish) or more, put 3 (hotel) on California.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Tokyo Branch",
+    "text": "Japan: (hotel) per (hotel) you have on one other area.",
+    "types": ["Tourism"]
+  },
+  {
+    "name": "Blue Whales",
+    "text": "California: 2 (hotel)\nAn empty area: 2 (fish)",
+    "types": ["Tourism", "Nature"]
+  },
+  {
+    "name": "Humboldt Penguins",
+    "text": "Peru: 2 (fish)\nAnother area where you have a (hotel): 2 (hotel)",
+    "types": ["Tourism", "Nature"]
+  },
+  {
+    "name": "Manta Rays",
+    "text": "Coral Sea: 2 (hotel)\nAnother area where you have a (fish): 2 (fish).",
+    "types": ["Tourism", "Nature"]
+  },
+  {
+    "name": "Moray Eels",
+    "text": "Polynesia: 2 (fish)\nAn empty area: 2 (hotel)",
+    "types": ["Tourism", "Nature"]
+  },
+  {
+    "name": "Breeding Program",
+    "text": "Each area: (fish)\nYour (fish) don't move this turn",
+    "types": ["Nature"]
+  },
+  {
+    "name": "Cloning Program",
+    "text": "California: (fish) per (fish) you have in one other area.",
+    "types": ["Nature"]
+  },
+  {
+    "name": "Dugongs",
+    "text": "Coral Sea: 3 (fish)",
+    "types": ["Nature"]
+  },
+  {
+    "name": "Hatchery",
+    "text": "Anywhere: (hatchery)\n(Run: 2 (fish))",
+    "types": ["Nature"]
+  },
+  {
+    "name": "Robot Fish",
+    "text": "Each area: (fish) per (factory) you have there.",
+    "types": ["Nature"]
+  },
+  {
+    "name": "Sea Otters",
+    "text": "California: 3 (fish)",
+    "types": ["Nature"]
+  },
+  {
+    "name": "Sea Turtles",
+    "text": "Peru: 3 (fish)",
+    "types": ["Nature"]
+  },
+  {
+    "name": "Headquarters",
+    "text": "Anywhere: (hq)\n(The first time each turn that each type of (chit) is put here, put an extra one here.)",
+    "types": ["Special"]
+  },
+  {
+    "name": "Make the Rounds",
+    "text": "Run each area with (chit)–3 (chit). Next turn, play an extra card (from the table).",
+    "types": ["Special"]
+  },
+  {
+    "name": "More of the Same",
+    "text": "Anywhere: For each type of (chit) here, put another of those here.",
+    "types": ["Special"]
+  },
+  {
+    "name": "Oversee",
+    "text": "Run any 2 areas in either order.",
+    "types": ["Special"]
+  },
+  {
+    "name": "Overtime",
+    "text": "Run each area with a (factory).",
+    "types": ["Special"]
+  },
+  {
+    "name": "Trade Winds",
+    "text": "Run each area with 2 (fish) or more, without moving (fish). Then move all of your (fish) at once.",
+    "types": ["Special"]
+  }
+]
