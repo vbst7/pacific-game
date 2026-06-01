@@ -7,7 +7,7 @@
   },
   "hosting": {
     "public": "dist",
-    "site": "pacificgame.web.app",
+    "site": "pacificgame",
     "ignore": [
       "firebase.json",
       "**/.*",
