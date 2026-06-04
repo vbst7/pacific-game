@@ -10,9 +10,9 @@ import GameToken from '@/components/GameToken.vue';
 const router = useRouter();
 const { createLobby, joinLobby, lobbyId, players, isHost, myId } = useLobby();
 
-const nickname = ref('');
+const nickname = ref(localStorage.getItem('nickname') || '');
 const lobbyCodeInput = ref('');
-const playerColor = ref('#3b82f6');
+const playerColor = ref(localStorage.getItem('playerColor') || '#f1f5f1');
 
 const isDev = import.meta.env.DEV;
 const testResults = ref([]);
@@ -65,9 +65,14 @@ async function handleRunTests() {
 async function handleCreate() {
   try {
     const existingUuid = localStorage.getItem('UUID');
-    const result = await createLobby(nickname.value, playerColor.value, existingUuid);
+    const typedNickname = nickname.value.trim();
+    const result = await createLobby(typedNickname, playerColor.value, existingUuid);
     localStorage.setItem('UUID', result.playerId);
-    localStorage.setItem('nickname', result.nickname);
+    if (typedNickname) {
+      localStorage.setItem('nickname', typedNickname);
+    } else {
+      localStorage.removeItem('nickname');
+    }
     localStorage.setItem('playerColor', result.color);
     router.push(`/game/${result.id}`);
   } catch (e) {
@@ -80,9 +85,14 @@ async function handleJoin() {
   
   try {
     const existingUuid = localStorage.getItem('UUID');
-    const result = await joinLobby(lobbyCodeInput.value.toUpperCase(), nickname.value, playerColor.value, existingUuid);
+    const typedNickname = nickname.value.trim();
+    const result = await joinLobby(lobbyCodeInput.value.toUpperCase(), typedNickname, playerColor.value, existingUuid);
     localStorage.setItem('UUID', result.playerId);
-    localStorage.setItem('nickname', result.nickname);
+    if (typedNickname) {
+      localStorage.setItem('nickname', typedNickname);
+    } else {
+      localStorage.removeItem('nickname');
+    }
     localStorage.setItem('playerColor', result.color);
     router.push(`/game/${lobbyCodeInput.value.toUpperCase()}`);
   } catch (e) {
@@ -91,12 +101,12 @@ async function handleJoin() {
 }
 
 const availableColors = [
-  '#74C7A2',
-  '#fbbf24',
-  '#EF6A3E',
-  '#298fb4',
-  '#fda420',
-  '#94a3b8'
+  '#afc792',
+  '#dcdc90',
+  '#92b0b9', 
+  '#b69a74',
+  '#b1aea5',
+  '#f1f5f1'
 ];
 
 async function cycleColor() {
@@ -107,13 +117,13 @@ async function cycleColor() {
     .filter(p => p.id !== myId.value)
     .map(p => p.color);
 
-  const currentColor = me.color || '#94a3b8';
+  const currentColor = me.color || '#f1f5f1';
   const currentIndex = availableColors.indexOf(currentColor);
 
   for (let i = 1; i <= availableColors.length; i++) {
     const nextIndex = (currentIndex + i) % availableColors.length;
     const nextColor = availableColors[nextIndex];
-    if (nextColor === '#94a3b8' || !usedColors.includes(nextColor)) {
+    if (nextColor === '#f1f5f1' || !usedColors.includes(nextColor)) {
       const playerRef = doc(db, `lobbies/${lobbyId.value}/players`, myId.value);
       await updateDoc(playerRef, { color: nextColor });
       localStorage.setItem('playerColor', nextColor);
@@ -123,17 +133,16 @@ async function cycleColor() {
 }
 
 async function handleRename(newName) {
-  if (!myId.value || !newName) return;
+  if (!myId.value) return;
+  const trimmed = newName.trim();
 
   const playerRef = doc(db, `lobbies/${lobbyId.value}/players`, myId.value);
-  await updateDoc(playerRef, { name: newName });
-  
-  if (isHost.value) {
-    const lobbyRef = doc(db, "lobbies", lobbyId.value);
-    await updateDoc(lobbyRef, { hostId: newName });
+  if (trimmed) {
+    await updateDoc(playerRef, { name: trimmed });
+    localStorage.setItem('nickname', trimmed);
+  } else {
+    localStorage.removeItem('nickname');
   }
-  
-  localStorage.setItem('nickname', newName);
 }
 </script>
 
@@ -205,7 +214,7 @@ async function handleRename(newName) {
                 Rio Grande Games
               </a>
               <span class="credits-sep">·</span>
-              <a href="https://vbst7.github.io/" target="_blank" rel="noopener" class="credit-link">
+              <a href="https://github.com/vbst7/pacific-game" target="_blank" rel="noopener" class="credit-link">
                 GitHub
               </a>
             </div>

@@ -37,9 +37,15 @@
                 <span class="field-label mb-0" style="color: black; display: inline;">Lobby Code: </span>
                 <span class="lobby-code">{{ lobbyId }}</span>
               </div>
-              <button v-if="isHost" @click="handleStartGame" class="pacific-btn btn-start">
-                START GAME
-              </button>
+              <div class="flex gap-2">
+                <button @click="handleReturnToHome" 
+                        class="pacific-btn bg-slate-600 hover:bg-slate-500 text-white !py-2 !px-4 !text-[10px] !shadow-none uppercase font-black">
+                  Leave
+                </button>
+                <button v-if="isHost" @click="handleStartGame" class="pacific-btn btn-start">
+                  START GAME
+                </button>
+              </div>
             </div>
 
             <div class="space-y-4 player-list">
@@ -97,28 +103,28 @@
         <aside class="w-48 border-r border-slate-800/10 bg-white/30 backdrop-blur-md p-3 flex flex-col gap-2 shadow-xl overflow-hidden min-h-0">
         <div class="flex-none flex flex-col gap-3 shrink-0">
           <!-- 1. YOUR CARD -->
-          <div v-if="myPlayer" 
+          <div v-if="myPlayer && !myPlayer.isSpectator" 
               @click="selectPlayer(myPlayer.id)"
               class="cursor-pointer transition-all duration-200 border-2 rounded-xl p-3 shadow-md flex flex-col relative overflow-hidden"
               :class="isViewingSelf ? 'border-amber-400 scale-105 shadow-lg' : 'border-white/10 opacity-50 hover:opacity-100'"
               :style="{ backgroundColor: myPlayer.color }">
-            <div v-if="isViewingSelf" class="absolute top-0 right-0 bg-amber-400 px-2 py-0.5 text-[8px] font-black text-white uppercase rounded-bl-lg">Viewing</div>
-            <div class="absolute top-0 left-0 bg-amber-400 px-2 py-0.5 text-[8px] font-black text-white uppercase rounded-bl-lg">
-              You
+            <div v-if="isViewingSelf" class="absolute top-0 right-0 bg-amber-500 px-2 py-0.5 text-[8px] font-black text-white uppercase rounded-bl-lg">Viewing</div>
+            <div class="absolute top-0 left-0 bg-black/20 px-2 py-0.5 text-[8px] font-black text-white uppercase rounded-br-lg">
+              {{ myPlayer.isSpectator ? 'Spectator' : 'You' }}
             </div>
-            <div class="flex justify-between items-center font-bold">
+            <div class="flex justify-between items-center font-bold mt-2">
               <span style="color: black" class="drop-shadow-sm font-black">
                 {{ myPlayer.name }}
               </span>
               <div class="flex items-center gap-1.5">
                 <GameToken type="money" size="sm" class="!w-3 !h-3" />
-                <span class="text-black text-base font-black">{{ viewedPlayerData.money }}</span>
+                <span class="text-black text-base font-black">{{ myPlayer.money }}</span>
               </div>
             </div>
           </div>
 
           <!-- 2. OPPONENTS -->
-          <div v-for="p in opponents" :key="p.id" 
+          <div v-for="p in realOpponents" :key="p.id" 
               @click="selectPlayer(p.id)"
               class="cursor-pointer transition-all duration-200 border-2 rounded-xl p-3 shadow-sm flex flex-col relative"
               :class="selectedPlayerId === p.id ? 'border-cyan-400 scale-105 shadow-lg' : 'border-white/10 opacity-50 hover:opacity-100'"
@@ -137,10 +143,26 @@
               <span class="text-[9px] uppercase font-bold text-black/60">Cards: {{ p.hand?.length || 0 }}</span>
             </div>
           </div>
+
+          <!-- 3. SPECTATORS CARD -->
+          <div v-if="spectators.length > 0"
+               class="transition-all duration-200 border-2 border-white/10 opacity-60 rounded-xl p-3 shadow-sm flex flex-col relative"
+               style="background-color: rgba(30, 41, 59, 0.7)">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Spectators</span>
+            </div>
+            <div class="space-y-1">
+              <div v-for="s in spectators" :key="s.id" class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                <div class="w-1 h-1 rounded-full bg-slate-500"></div>
+                {{ s.name }}
+                <span v-if="s.id === myUuid" class="text-[10px] opacity-50">(You)</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Action Area (Grows as needed) & Personal Log Area (Fills remainder, scrollable) -->
-        <div v-if="myPlayer?.interaction || phaseActionRequired || myPlayer?.turnLogs?.length > 0" 
+        <div v-if="!myPlayer?.isSpectator && (myPlayer?.interaction || phaseActionRequired || myPlayer?.turnLogs?.length > 0)" 
              class="flex-1 min-h-0 flex flex-col mt-4 pt-4 border-t border-slate-800/10 overflow-hidden">
           
           <!-- Interaction Instructions Overlay -->
@@ -313,7 +335,7 @@
               <div class="bg-white/90 backdrop-blur shadow-xl border-2 border-white px-6 py-2 rounded-full flex items-center gap-3">
                 <div class="w-3 h-3 rounded-full animate-pulse" :style="{ backgroundColor: viewedPlayerData?.color }"></div>
                 <span class="text-xs font-black uppercase tracking-widest text-slate-800">
-                  {{ isViewingSelf ? 'Viewing Your Mat' : `Viewing ${viewedPlayerData?.name}'s Mat` }}
+                  {{ myPlayer?.isSpectator && isViewingSelf ? 'Spectating...' : (isViewingSelf ? 'Viewing Your Mat' : `Viewing ${viewedPlayerData?.name}'s Mat`) }}
                 </span>
               </div>
             </div>
@@ -322,7 +344,7 @@
             <section class="flex-1 relative flex items-center justify-center shadow-inner parchment-bg min-h-0 overflow-hidden"
             style="background-image: url('/images/map.png'); background-size: cover; background-position: top;">
       
-              <div class="relative w-[900px] h-[262.5px] scale-90 lg:scale-100 origin-center z-10">
+              <div class="relative w-[900px] h-[262.5px] scale-90 lg:scale-100 origin-center z-10" :key="viewedPlayerData?.id">
                 
               <!-- Next Turn Cards on Mat-->
               <template v-for="(slotPos, idx) in [{x: -17.5, y: 50}, {x: 957.5, y: 50}]" :key="idx">
@@ -413,7 +435,7 @@
                     {{ getAreaType(area.name) }}
                   </span>
                   <span class="text-xs font-bold text-slate-900 drop-shadow-sm uppercase">
-                    {{ area.name }}
+                      {{ area.name === 'CoralSea' ? 'Coral Sea' : area.name }}
                   </span>
                 </div>
               </div>
@@ -423,7 +445,7 @@
         </div>
 
         <!-- Sort Buttons Bar -->
-        <div class="bg-[#CF8841] px-6 py-1 flex justify-end gap-2 border-t border-slate-800/10 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)] z-30 shrink-0">
+        <div v-if="!myPlayer?.isSpectator" class="bg-[#CF8841] px-6 py-1 flex justify-end gap-2 border-t border-slate-800/10 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)] z-30 shrink-0">
           <button @click="sortByType" class="bg-black/20 hover:bg-black/40 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full transition-colors border border-white/10">
             Sort by Type
           </button>
@@ -481,7 +503,7 @@
           <button @click="showHelpModal = true; helpSubView = 'main'" class="w-full py-2 bg-cyan-700 text-white font-black uppercase tracking-widest rounded-lg shadow-lg hover:bg-cyan-600 transition-all active:scale-95 text-xs">
             Help / Rules
           </button>
-          <button v-if="lobbyData?.status !== 'finished'" 
+          <button v-if="lobbyData?.status !== 'finished' && !myPlayer?.isSpectator" 
                   @click="handleResign" 
                   class="w-full mt-2 py-2 bg-rose-700 text-white font-black uppercase tracking-widest rounded-lg shadow-lg hover:bg-rose-600 transition-all active:scale-95 text-xs">
             Resign
@@ -489,7 +511,7 @@
           <button v-else 
                   @click="handleReturnToHome" 
                   class="w-full mt-2 py-2 bg-rose-700 text-white font-black uppercase tracking-widest rounded-lg shadow-lg hover:bg-rose-600 transition-all active:scale-95 text-xs">
-            Exit to Lobby
+            Exit
           </button>
         </div>
       </aside>
@@ -936,14 +958,30 @@ const hand = computed(() => {
   return p?.hand || [];
 });
 const isHost = computed(() => lobbyData.value?.hostId === myUuid.value);
+const realOpponents = computed(() => opponents.value.filter(p => !p.isSpectator));
+const spectators = computed(() => players.value.filter(p => p.isSpectator));
 
-watch(myPlayer, (newVal) => {
-  if (newVal) {
+// Auto-view first real player if spectator
+watch([myPlayer, players], ([me, all]) => {
+  if (me?.isSpectator && !selectedPlayerId.value && all.length > 0) {
+    const firstReal = all.find(p => !p.isSpectator);
+    if (firstReal) {
+      selectedPlayerId.value = firstReal.id;
+    }
+  }
+}, { immediate: true });
+
+// Watch for our own removal from the players list (resignation or lobby deletion)
+watch(myPlayer, (me, oldMe) => {
+  if (oldMe && !me && lobbyData.value?.status !== 'loading') {
+    router.push('/');
+  }
+  if (me) {
     console.log('[GameView] My Player State:', {
-      name: newVal.name,
-      interaction: newVal.interaction?.type,
-      handSize: newVal.hand?.length,
-      hasMat: !!newVal.mat
+      name: me.name,
+      interaction: me.interaction?.type,
+      handSize: me.hand?.length,
+      hasMat: !!me.mat
     });
   }
 }, { deep: true });
@@ -1058,7 +1096,7 @@ const parseTokenLog = (text) => {
   }
   // Handle HTML entities like &nbsp;
   parts = parts.map(p => ({
-    ...p, content: p.type === 'text' ? p.content.replace(/&nbsp;/g, ' ') : p.content
+      ...p, content: p.type === 'text' ? p.content.replace(/&nbsp;/g, ' ').replace(/CoralSea/g, 'Coral Sea') : p.content
   }));
   return parts;
 };
@@ -1103,6 +1141,7 @@ const handleUndoSelection = () => {
 const phaseActionRequired = computed(() => {
   const phase = lobbyData.value?.phase;
   const player = myPlayer.value;
+  if (player?.isSpectator) return null;
   if (!player || player.interaction) return null;
 
   const hasDSN = player.nextTurnCards?.some(c => c.name === 'Dolphin Spy Network');
@@ -1165,10 +1204,17 @@ const handleReturnToHome = async () => {
   const playerRef = doc(db, `lobbies/${props.id}/players`, myUuid.value); // Use UUID
   const lobbyRef = doc(db, 'lobbies', props.id);
 
-  if (players.value.length <= 1) {
-    await deleteDoc(playerRef);
-    await deleteDoc(lobbyRef);
+  const pCount = players.value.length;
+
+  if (pCount <= 1) {
+    await Promise.all([deleteDoc(playerRef), deleteDoc(lobbyRef)]);
   } else {
+    if (isHost.value) {
+      const nextHost = players.value.find(p => p.id !== myUuid.value);
+      if (nextHost) {
+        await updateDoc(lobbyRef, { hostId: nextHost.id });
+      }
+    }
     await deleteDoc(playerRef);
   }
   safePush('/');
@@ -1183,12 +1229,15 @@ const confirmResignation = async () => {
   const playerRef = doc(db, `lobbies/${props.id}/players`, myUuid.value);
   const lobbyRef = doc(db, 'lobbies', props.id);
 
-  if (players.value.length === 1) {
-    // Only human player left: delete player doc and the lobby itself
-    await deleteDoc(playerRef);
-    await deleteDoc(lobbyRef);
+  if (players.value.length <= 1) {
+    await Promise.all([deleteDoc(playerRef), deleteDoc(lobbyRef)]);
   } else {
-    // Other players exist: just remove self
+    if (isHost.value) {
+      const nextHost = players.value.find(p => p.id !== myUuid.value);
+      if (nextHost) {
+        await updateDoc(lobbyRef, { hostId: nextHost.id });
+      }
+    }
     await deleteDoc(playerRef);
   }
 
@@ -1197,11 +1246,11 @@ const confirmResignation = async () => {
 };
 
 const availableColors = [
-  '#B3CA94',
-  '#DCDE90',
-  '#92B0BA',
-  '#B69B74', 
-  '#B1AEA5',
+  '#afc792',
+  '#dcdc90',
+  '#92b0b9', 
+  '#b69a74',
+  '#b1aea5',
   '#f1f5f1'
 ];
 
@@ -1236,14 +1285,17 @@ async function handleRename(newName) {
   const playerId = myUuid.value; 
   const lobbyId = props.id;
 
-  if (!playerId || !newName || newName === myPlayer.value?.name) return;
+  if (!playerId || newName === myPlayer.value?.name) return;
+  const trimmed = (newName || '').trim();
 
   try {
     const playerRef = doc(db, `lobbies/${lobbyId}/players`, playerId);
-    await updateDoc(playerRef, { name: newName });
-    
-    localStorage.setItem('nickname', newName);
-    
+    if (trimmed) {
+      await updateDoc(playerRef, { name: trimmed });
+      localStorage.setItem('nickname', trimmed);
+    } else {
+      localStorage.removeItem('nickname');
+    }
   } catch (e) {
     console.error("Failed to rename player:", e);
   }
@@ -1429,7 +1481,6 @@ onMounted(async () => {
     // joinLobby may assign a new ID if uuid param is null/undefined; preserve existing IDs.
     if (!existingUuid) {
       localStorage.setItem('UUID', result.playerId);
-      localStorage.setItem('nickname', result.nickname);
     }
   }
 });

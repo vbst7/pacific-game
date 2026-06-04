@@ -26,7 +26,7 @@
   },
   {
     "name": "Port",
-    "text": "Anywhere: (boat), (port)\n(Run first: You may move a (hotel), (factory), (fish) or (boat) to here.",
+    "text": "Anywhere: (boat), (port)\n(Run first: You may move a (hotel), (factory), (fish) or (boat) to here.)",
     "types": ["Transit"]
   },
   {

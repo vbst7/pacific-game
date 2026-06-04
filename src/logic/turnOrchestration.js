@@ -231,6 +231,9 @@ export const startAreaRun = (player, area, remainingAreas, cardName) => {
     }
   }
 
+  // Log which area is starting its run
+  player.turnLogs.push(`Running ${area}:`);
+
   // Handle Hatchery (Automatic, runs first)
   if (player.mat[area].hatchery > 0) {
     const fishToAdd = Array(player.mat[area].hatchery * 2).fill('fish');
@@ -246,6 +249,8 @@ export const startAreaRun = (player, area, remainingAreas, cardName) => {
       pendingElements: [], // Elements recalculated after Port
       remainingAreas,
       runSource: cardName,
+      totalPorts: player.mat[area].port,
+      portsUsed: 0,
       isAreaRun: true,
       canPass: true,
       filter: ['fish', 'hotel', 'factory', 'boat'],
@@ -290,7 +295,7 @@ export const handleFishMovement = (player, area) => {
 };
 
 export const finalizeTurnLog = async (lobbyId, player) => {
-  if (player.bonusCounter && typeof player.bonusCounter === 'object') {
+  if (!player.isSpectator && player.bonusCounter && typeof player.bonusCounter === 'object') {
     Object.entries(player.bonusCounter).forEach(([cardName, count]) => {
       if (count > 0) {
         player.turnLogs.push(`${cardName}: ${gainMoney(player, count * 2, cardName)}`);
@@ -299,7 +304,7 @@ export const finalizeTurnLog = async (lobbyId, player) => {
     player.bonusCounter = {};
   }
 
-  if (!player.turnLogs || player.turnLogs.length === 0) return;
+  if (player.isSpectator || !player.turnLogs || player.turnLogs.length === 0) return;
 
   const playerHeader = `<span style="color: ${player.color}">${player.name}'s actions:</span>`;
   const finalLogBlock = [playerHeader, ...player.turnLogs].join('<br>');
@@ -316,8 +321,10 @@ export const processTurnEnd = async (lobbyId, currentTurn, players) => {
   const lobbySnap = await getDoc(lobbyRef);
   const lobbyData = lobbySnap.data();
   let currentDeck = [...(lobbyData.deck || [])];
-  
-  const playerUpdates = players.map(p => {
+
+  const activePlayers = players.filter(p => !p.isSpectator);
+
+  const playerUpdates = activePlayers.map(p => {
     const pRef = doc(db, `lobbies/${lobbyId}/players`, p.id);
 
     // Fulfill draws from Computer Chip Factory
@@ -375,12 +382,13 @@ export const processTurnEnd = async (lobbyId, currentTurn, players) => {
   await Promise.all([
     ...playerUpdates,
     updateDoc(lobbyRef, {
+      status: isGameOver ? 'finished' : 'in-progress',
       phase: isGameOver ? 'finished' : 'hand-selection',
       turn: isGameOver ? currentTurn : nextTurn,
       playedCards: [],
       deck: currentDeck,
-      logs: arrayUnion(isGameOver 
-        ? `<b>Game Over! Final Rankings:</b><br>${[...players].sort((a, b) => (b.money || 0) - (a.money || 0)).map((p, i) => `${i + 1}. <span style="color: ${p.color}">${p.name}</span>: $${p.money || 0}`).join('<br>')}`
+      logs: arrayUnion(isGameOver
+        ? `<b>Game Over! Final Rankings:</b><br>${activePlayers.sort((a, b) => (b.money || 0) - (a.money || 0)).map((p, i) => `${i + 1}. <span style="color: ${p.color}">${p.name}</span>: $${p.money || 0}`).join('<br>')}`
         : `<b>Starting Turn ${nextTurn}</b>`)
     })
   ]);
@@ -446,7 +454,7 @@ export const resolvePlayerInteraction = async (lobbyId, player, choice) => {
     if (typeof choice !== 'string' || !areaOrder.includes(choice)) return;
     player.turnLogs.push(addChit(player, choice, 'hotel', 'Setup'));
     player.interaction = { 
-      type: 'setup-factory', excludeArea: choice, instruction: 'Setup: Place Factory',
+      type: 'setup-factory', excludeArea: choice, instruction: 'Setup: Place Factory in a different area',
       pendingCard: interaction.pendingCard || null, 
       mtrCards: interaction.mtrCards || null, 
       mtrCard: interaction.mtrCard || null
@@ -566,8 +574,14 @@ export const resolvePlayerInteraction = async (lobbyId, player, choice) => {
       }
 
       player.turnLogs.push(moveChit(player, choice.areaName, interaction.area, choice.tokenType, 'Port'));
-      const elements = calculateRunnableElements(player, interaction.area, interaction.runSource || 'Port');
-      proceedWithAreaRun(player, interaction.area, elements, interaction.remainingAreas, interaction.runSource || 'Port');
+
+      interaction.portsUsed++;
+      if (interaction.portsUsed < interaction.totalPorts) {
+        interaction.instruction = `Port in ${interaction.area} (${interaction.portsUsed + 1}/${interaction.totalPorts}): Select a (chit) from any area to move here, or Pass.`;
+      } else {
+        const elements = calculateRunnableElements(player, interaction.area, interaction.runSource || 'Port');
+        proceedWithAreaRun(player, interaction.area, elements, interaction.remainingAreas, interaction.runSource || 'Port');
+      }
     }
   }
   else if (interaction.cardName === 'Fishing' && interaction.type === 'select-area' && typeof choice === 'string' && areaOrder.includes(choice)) {
@@ -854,24 +868,28 @@ export const resolvePlayerInteraction = async (lobbyId, player, choice) => {
 
   else if (interaction.type === 'mtr-choose-first') {
     const lobbyRef = doc(db, 'lobbies', lobbyId);
-    const first = (choice === interaction.card1.instanceId || choice === interaction.card1.name) ? interaction.card1 : interaction.card2;
-    const second = (choice === interaction.card1.instanceId || choice === interaction.card1.name) ? interaction.card2 : interaction.card1;
+    const isFirst = (choice === interaction.card1.instanceId || choice === interaction.card1.name);
+    const first = isFirst ? interaction.card1 : interaction.card2;
+    const second = isFirst ? interaction.card2 : interaction.card1;
+    const firstUnique = isFirst ? interaction.isUnique1 : interaction.isUnique2;
+    const secondUnique = isFirst ? interaction.isUnique2 : interaction.isUnique1;
     const mtrCards = [first, second];
     const mtrCardContext = interaction.mtrCard || { name: 'Make the Rounds' };
 
-    const mtrFirstLogs = executeCard(first, {}, player);
+    const mtrFirstLogs = executeCard(first, { isUnique: firstUnique }, player);
     player.turnLogs.push(...mtrFirstLogs);
 
     const firstMsg = `<span style="color: ${player.color}">${player.name}</span> executes <span class="card-link" data-card-name="${first.name}">${first.name}</span> then <span class="card-link" data-card-name="${second.name}">${second.name}</span>`;
 
     if (player.interaction && player.interaction.type !== 'mtr-choose-first') {
       player.interaction.pendingCard = second || null;
+      player.interaction.isUniquePending = secondUnique;
       player.interaction.mtrCards = mtrCards || null;
       player.interaction.mtrCard = mtrCardContext || null;
       await updateDoc(lobbyRef, { logs: arrayUnion(firstMsg) });
     } else {
       const secondMsg = `<span style="color: ${player.color}">${player.name}</span> continues sequence with <span class="card-link" data-card-name="${second.name}">${second.name}</span>`;
-      const mtrSecondLogs = executeCard(second, {}, player);
+      const mtrSecondLogs = executeCard(second, { isUnique: secondUnique }, player);
       player.turnLogs.push(...mtrSecondLogs);
 
       await updateDoc(lobbyRef, { logs: arrayUnion(firstMsg, secondMsg) });
@@ -903,7 +921,7 @@ export const resolvePlayerInteraction = async (lobbyId, player, choice) => {
       await updateDoc(lobbyRef, { logs: arrayUnion(logMsg) });
 
       player.interaction = null;
-      const secondLogs = executeCard(second, {}, player);
+      const secondLogs = executeCard(second, { isUnique: interaction.isUniquePending }, player);
       player.turnLogs.push(...secondLogs);
 
       if (player.interaction) {

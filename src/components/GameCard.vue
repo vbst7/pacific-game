@@ -207,7 +207,7 @@ const illustratedTextClass  = computed(() => 'font-bold leading-tight italic whi
 const illustratedTokenClass = computed(() => '!w-[9.5cqw] !h-[9.5cqw]');
 
 const imageUrl = computed(() =>
-  `/images/cards/${props.card.name.replace(/ /g, '_')}.png`
+  `/images/cards/${props.card.name.replace(/ /g, '_')}.webp`
 );
 
 const illustratedTitleParts = computed(() => {

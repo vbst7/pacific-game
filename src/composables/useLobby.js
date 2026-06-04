@@ -1,6 +1,6 @@
 import { ref, reactive, onUnmounted } from 'vue';
 import { db } from '@/firebase';
-import { doc, setDoc, updateDoc, onSnapshot, collection, getDoc, arrayRemove } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, onSnapshot, collection, getDoc, getDocs, arrayRemove } from 'firebase/firestore';
 
 export function useLobby() {
   const lobbyData = ref(null);
@@ -53,42 +53,66 @@ export function useLobby() {
 
     const playerRef = doc(db, `lobbies/${id}/players`, uuid); // Use UUID as document ID
     
+    // Ensure unique colors: check existing players in this lobby
+    const playersSnap = await getDocs(collection(db, `lobbies/${id}/players`));
+    const usedColors = playersSnap.docs
+      .filter(d => d.id !== uuid)
+      .map(d => d.data().color)
+      .filter(c => c && c !== '#f1f5f1'); // White is always allowed as a fallback
+
+    let resolvedColor = color;
+    if (usedColors.includes(resolvedColor) && resolvedColor !== '#f1f5f1') {
+      resolvedColor = '#f1f5f1'; // Default to white if requested color is taken
+    }
+
     // Check if player already exists (e.g., rejoining)
     const playerDoc = await getDoc(playerRef);
     if (playerDoc.exists()) {
       // Player exists, update their details if necessary
       await updateDoc(playerRef, {
         name: nickname,
-        color: color,
+        color: resolvedColor,
         // Do not reset hand, mat, money if rejoining
       });
     } else {
-      // New player, set initial state
-      await setDoc(playerRef, {
-        name: nickname,
-        color: color,
-        money: 0, // Initial money should be 0, as per GameView.vue's handleStartGame
-        mat: { 
-          Japan: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
-          California: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
-          Peru: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
-          Polynesia: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
-          CoralSea: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 } 
-        },
-        hand: [],
-        isReady: false,
-        selectedCardId: null, // Add these for consistency
-        confirmedPlay: false,
-        selectedPlayedCardId: null,
-        secondPlayedCardId: null,
-        confirmedPlayedCard: false,
-        interaction: null,
-        turnLogs: [],
-        nextTurnCards: [], // Initialize nextTurnCards
-        setAside: [],      // Initialize setAside
-        needsDraw: 0,
-        bonusCounter: {}
-      });
+      // Check if the game is already in progress
+      const lobbySnap = await getDoc(doc(db, "lobbies", id));
+      const isSpectator = lobbySnap.exists() && lobbySnap.data().status !== 'waiting';
+
+      if (isSpectator) {
+        await setDoc(playerRef, {
+          name: nickname,
+          color: resolvedColor,
+          isSpectator: true
+        });
+      } else {
+        // New player, set initial state
+        await setDoc(playerRef, {
+          name: nickname,
+          color: resolvedColor,
+          money: 0, // Initial money should be 0, as per GameView.vue's handleStartGame
+          mat: { 
+            Japan: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
+            California: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
+            Peru: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
+            Polynesia: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 }, 
+            CoralSea: { fish: 0, hotel: 0, boat: 0, factory: 0, balloon: 0 } 
+          },
+          hand: [],
+          isReady: false,
+          selectedCardId: null, // Add these for consistency
+          confirmedPlay: false,
+          selectedPlayedCardId: null,
+          secondPlayedCardId: null,
+          confirmedPlayedCard: false,
+          interaction: null,
+          turnLogs: [],
+          nextTurnCards: [], // Initialize nextTurnCards
+          setAside: [],      // Initialize setAside
+          needsDraw: 0,
+          bonusCounter: {}
+        });
+      }
     }
 
     // Cancel any previous listeners before creating new ones

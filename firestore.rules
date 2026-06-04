@@ -3,17 +3,19 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 6, 3);
+    // Rules for the Pacific lobby system
+    match /lobbies/{lobbyId} {
+      // Anyone can create a lobby or read its status
+      allow read, create: if true;
+      
+      // Allow game flow updates (starting the game, logging actions, advancing phases)
+      // Note: Strict "Host Only" enforcement requires Firebase Auth (request.auth)
+      allow update: if true;
+
+      match /players/{playerId} {
+        // Anyone can join a lobby, update their turn state, or resign (delete themselves)
+        allow read, create, update, delete: if true;
+      }
     }
   }
 }

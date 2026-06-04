@@ -270,6 +270,18 @@ export function useCardPlay(lobbyIdRef, myPlayerRef, playersRef, lobbyDataRef, m
   const startExecution = async () => {
     const lobbyRef = doc(db, 'lobbies', lobbyIdRef.value);
 
+    // Calculate uniqueness of card names chosen across all players
+    const nameCounts = {};
+    playersRef.value.forEach(p => {
+      [p.selectedPlayedCardId, p.secondPlayedCardId].forEach(id => {
+        if (!id) return;
+        const card = lobbyDataRef.value.playedCards.find(c => c.instanceId === id);
+        if (card) {
+          nameCounts[card.name] = (nameCounts[card.name] || 0) + 1;
+        }
+      });
+    });
+
     // For each player, run the logic of their selected played card
     const playerLogicPromises = playersRef.value.map(async (player) => {
       // Note: mutating reactive player objects ensures changes are available to processTurnEnd immediately
@@ -289,6 +301,8 @@ export function useCardPlay(lobbyIdRef, myPlayerRef, playersRef, lobbyDataRef, m
           type: 'mtr-choose-first',
           card1,
           card2,
+          isUnique1: nameCounts[card1.name] === 1,
+          isUnique2: nameCounts[card2.name] === 1,
           mtrCard: mtrCard || null,
           instruction: `Make the Rounds: Choose which card to resolve first.`
         };
@@ -297,7 +311,7 @@ export function useCardPlay(lobbyIdRef, myPlayerRef, playersRef, lobbyDataRef, m
         const execMsg = `<span style="color: ${player.color}">${player.name}</span> is executing <span class="card-link" data-instance-id="${card1.instanceId}" data-card-name="${card1.name}" style="color: ${cardColor}; cursor: help;">${card1.name}</span>`;
         await updateDoc(lobbyRef, { logs: arrayUnion(execMsg) });
 
-        player.turnLogs = executeCard(card1, {}, player);
+        player.turnLogs = executeCard(card1, { isUnique: nameCounts[card1.name] === 1 }, player);
         if (!player.interaction) initiateRunAreas(player, card1);
       } 
 

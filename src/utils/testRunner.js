@@ -372,11 +372,18 @@ export const gameTests = [
     expected: { mat: { Japan: { boat: 1, port: 1 } } }
   },
   {
+    name: "Port - Multiple Ports in one area",
+    initialState: { mat: { Japan: { port: 2, hotel: 1 }, California: { hotel: 2 } }, money: 0 },
+    hand: ["Glass-Bottom Boats"], 
+    script: { playedCard: "Glass-Bottom Boats", actions: [], areaRun: [{ areaName: "California", tokenType: "hotel" }, { areaName: "California", tokenType: "hotel" }] },
+    expected: { mat: { Japan: { port: 2, hotel: 3 }, California: { hotel: 0 } } }
+  },
+  {
     name: "Port - Move chit during run",
-    initialState: { mat: { Japan: { port: 1 }, California: { fish: 1 } }, money: 0 },
+    initialState: { mat: { Japan: { port: 1 }, California: { hotel: 1 } }, money: 0 },
     hand: ["Disperse"], // Transit triggers Japan run
-    script: { playedCard: "Disperse", actions: ["Japan", { areaName: "Japan", tokenType: "boat" }, "California"], areaRun: [{ areaName: "California", tokenType: "fish" }] },
-    expected: { mat: { Japan: { port: 1 }, California: { boat: 1, fish: 1 } } }
+    script: { playedCard: "Disperse", actions: ["Japan", { areaName: "Japan", tokenType: "boat" }, "California"], areaRun: [{ areaName: "California", tokenType: "hotel" }] },
+    expected: { mat: { Japan: { port: 1, hotel: 1 }, California: { boat: 1, hotel: 0 } } }
   },
   {
     name: "Balloon Trip - Placement and initial move",
